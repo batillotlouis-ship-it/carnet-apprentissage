@@ -234,11 +234,13 @@ const GAPS = [1, 2, 4, 7, 16];            // rappels à J+1, J+3, J+7, J+14, J+3
 const JALONS = ["J+1", "J+3", "J+7", "J+14", "J+30"];
 const TECH = [
   {k:"test", l:"Me tester de tête", h:"feuille blanche, questions", a:true},
-  {k:"refaire", l:"Refaire un exercice sans regarder", a:true},
+  {k:"exos", l:"Chercher des exercices sans le cours", a:true},
+  {k:"refaire", l:"Refaire un exercice déjà corrigé, sans regarder", a:true},
   {k:"melanger", l:"Mélanger des types d’exercices", a:true},
   {k:"erreurs", l:"Reprendre mes erreurs", a:true},
   {k:"expliquer", l:"Expliquer à voix haute", a:true},
   {k:"exemple", l:"Étudier un exemple corrigé puis le refaire", a:true},
+  {k:"exoscours", l:"Faire des exercices avec le cours ouvert", a:false},
   {k:"relire", l:"Relire le cours", a:false},
   {k:"surligner", l:"Surligner ou recopier", a:false},
   {k:"correction", l:"Lire une correction", a:false}
@@ -246,6 +248,19 @@ const TECH = [
 const TK = Object.fromEntries(TECH.map(t => [t.k, t]));
 const MAT = ["Maths","Physique-chimie","SVT","SES","NSI","Français","Philosophie","Histoire-géo","Anglais","LV2","Autre"];
 const DUR = [15, 30, 45, 60, 90];
+const EX = {
+  "Maths": ["Dérivation","Quelle est la dérivée de x ↦ xⁿ ?","x ↦ n·xⁿ⁻¹"],
+  "Physique-chimie": ["Énergie","Quelle est l’expression de l’énergie cinétique ?","Ec = ½·m·v² (m en kg, v en m/s, Ec en J)"],
+  "SVT": ["Photosynthèse","Dans quel organite a lieu la photosynthèse ?","Dans les chloroplastes"],
+  "SES": ["Le marché","Que devient le prix d’équilibre si la demande augmente et que l’offre ne bouge pas ?","Il augmente"],
+  "NSI": ["Python","Que renvoie len([3, 5, 8]) ?","3"],
+  "Français": ["Figures de style","Qu’est-ce qu’une anaphore ?","La répétition d’un mot ou d’un groupe de mots en début de phrase ou de vers"],
+  "Philosophie": ["La conscience","Quel philosophe a écrit « Je pense, donc je suis » ?","Descartes, dans le Discours de la méthode (1637)"],
+  "Histoire-géo": ["La Révolution française","En quelle année est adoptée la Déclaration des droits de l’homme et du citoyen ?","1789 (26 août)"],
+  "Anglais": ["Vocabulaire","Comment dit-on « pourtant » en anglais ?","however, yet"],
+  "LV2": ["Vocabulaire","Comment traduis-tu « il faut que » ?","En espagnol : hay que, es necesario que"],
+  "Autre": ["Chapitre 3","Quelle est la définition de … ?","Une réponse courte et précise, que tu peux vérifier"]
+};
 const JOURS = ["dimanche","lundi","mardi","mercredi","jeudi","vendredi","samedi"];
 const J1 = ["D","L","M","M","J","V","S"];
 const MOIS = ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
@@ -305,19 +320,19 @@ function demoState(){
   const s = blank("Léa"); s.demo = true;
   const plan = [
     [-20,"Maths",45,["relire","surligner"],0],
-    [-19,"Physique-chimie",30,["relire"],0],
+    [-19,"Physique-chimie",30,["exoscours","relire"],0],
     [-17,"Maths",60,["relire","correction"],0],
     [-15,"SVT",30,["surligner","relire"],0],
     [-14,"Physique-chimie",45,["relire","test"],0],
-    [-13,"Maths",30,["correction","refaire"],1],
+    [-13,"Maths",30,["exoscours","correction"],1],
     [-11,"Physique-chimie",30,["test","relire"],1],
     [-10,"Maths",45,["refaire","exemple"],0],
     [-8,"SVT",30,["test"],1],
     [-7,"Maths",60,["melanger","erreurs","relire"],1],
     [-6,"Physique-chimie",30,["test","erreurs"],1],
-    [-5,"Maths",45,["refaire","test"],1],
+    [-5,"Maths",45,["exos","test"],1],
     [-3,"Physique-chimie",45,["exemple","refaire","test"],1],
-    [-2,"Maths",30,["melanger","erreurs"],1],
+    [-2,"Maths",30,["exos","erreurs"],1],
     [-1,"SVT",15,["test","expliquer"],1]
   ];
   s.sessions = plan.map(([o,m,d,tt,tel]) => ({id:uid(), d:add(t,o), mat:m, dur:d, t:tt, tel:!!tel}));
@@ -532,7 +547,7 @@ function sheetLog(){
   h += `<div class="field"><span class="label" style="font-family:var(--display);text-transform:none;letter-spacing:0;color:var(--fg);font-size:.95rem">Quand&nbsp;?</span><div class="row">${["Aujourd’hui","Hier"].map((l,i) => `<button class="chip" data-act="set" data-k="when" data-v="${i}" aria-pressed="${st.when == i}">${l}</button>`).join("")}</div></div>`;
   h += `<div class="field"><span class="label" style="font-family:var(--display);text-transform:none;letter-spacing:0;color:var(--fg);font-size:.95rem">Matière</span><div class="row">${mats.map(m => `<button class="chip" data-act="set" data-k="mat" data-v="${esc(m)}" aria-pressed="${st.mat === m}">${esc(m)}</button>`).join("")}</div></div>`;
   h += `<div class="field"><span class="label" style="font-family:var(--display);text-transform:none;letter-spacing:0;color:var(--fg);font-size:.95rem">Durée</span><div class="row">${DUR.map(d => `<button class="chip" data-act="set" data-k="dur" data-v="${d}" aria-pressed="${st.dur == d}">${d === 90 ? "1 h 30 et +" : fmtMin(d)}</button>`).join("")}</div></div>`;
-  h += `<div class="field"><span class="label" style="font-family:var(--display);text-transform:none;letter-spacing:0;color:var(--fg);font-size:.95rem">Ce que j’ai fait</span><p class="hint">Coche tout ce que tu as vraiment fait.</p>`;
+  h += `<div class="field"><span class="label" style="font-family:var(--display);text-transform:none;letter-spacing:0;color:var(--fg);font-size:.95rem">Ce que j’ai fait</span><p class="hint">Coche tout ce que tu as vraiment fait. Un DM ou des exercices donnés par ton prof comptent aussi&nbsp;: les as-tu cherchés sans le cours, ou avec le cours ouvert&nbsp;?</p>`;
   h += `<div class="group-t"><i style="background:var(--navy)"></i>Méthodes actives&nbsp;: ma mémoire travaille</div><div class="row">${TECH.filter(x => x.a).map(x => `<button class="chip" data-act="tech" data-v="${x.k}" aria-pressed="${st.t.includes(x.k)}">${esc(x.l)}</button>`).join("")}</div>`;
   h += `<div class="group-t" style="margin-top:6px"><i style="background:var(--passif)"></i>Méthodes passives&nbsp;: je regarde</div><div class="row">${TECH.filter(x => !x.a).map(x => `<button class="chip passif" data-act="tech" data-v="${x.k}" aria-pressed="${st.t.includes(x.k)}">${esc(x.l)}</button>`).join("")}</div></div>`;
   h += `<div class="switch"><span>Mon téléphone était dans une autre pièce</span><button data-act="tel" aria-pressed="${!!st.tel}" aria-label="Téléphone dans une autre pièce"></button></div>`;
@@ -561,9 +576,10 @@ function sheetQuestion(q, presetMat){
   let h = sheetHead(q ? "Modifier la question" : "Nouvelle question");
   if (!q && sheetState.count) h += `<p class="small" style="color:var(--ok);font-weight:600">${sheetState.count} ${plural(sheetState.count,"question ajoutée","questions ajoutées")}. Continue ou ferme.</p>`;
   h += `<div class="field"><label for="f-mat">Matière</label><select id="f-mat">${MAT.map(m => `<option ${m === mat ? "selected" : ""}>${esc(m)}</option>`).join("")}</select></div>`;
-  h += `<div class="field"><label for="f-chap">Chapitre <span class="muted small">(facultatif)</span></label><input type="text" id="f-chap" value="${esc(q ? q.chap : sheetState.chap || "")}" placeholder="ex. Dérivation"></div>`;
-  h += `<div class="field"><label for="f-q">Question</label><textarea id="f-q" placeholder="ex. Quelle est la dérivée de x ↦ xⁿ ?">${esc(q ? q.q : "")}</textarea></div>`;
-  h += `<div class="field"><label for="f-r">Réponse</label><p class="hint">Facultatif. Sinon, tu vérifieras dans ton cours.</p><textarea id="f-r" placeholder="ex. x ↦ n·xⁿ⁻¹">${esc(q ? q.r : "")}</textarea></div>`;
+  const ex = EX[mat] || EX.Autre;
+  h += `<div class="field"><label for="f-chap">Chapitre <span class="muted small">(facultatif)</span></label><input type="text" id="f-chap" value="${esc(q ? q.chap : sheetState.chap || "")}" placeholder="ex. ${esc(ex[0])}"></div>`;
+  h += `<div class="field"><label for="f-q">Question</label><textarea id="f-q" placeholder="ex. ${esc(ex[1])}">${esc(q ? q.q : "")}</textarea></div>`;
+  h += `<div class="field"><label for="f-r">Réponse</label><p class="hint">Facultatif. Sinon, tu vérifieras dans ton cours.</p><textarea id="f-r" placeholder="ex. ${esc(ex[2])}">${esc(q ? q.r : "")}</textarea></div>`;
   h += `<p class="err" id="f-err" hidden>Écris la question avant d’enregistrer.</p>`;
   if (q){
     h += `<button class="btn block" data-act="saveq">Enregistrer</button>`;
@@ -712,6 +728,11 @@ document.addEventListener("click", e => {
     case "askreset": $("resetzone").innerHTML = `<div class="confirm"><p>Tout effacer&nbsp;? Séances, questions et bilans seront perdus.</p><div class="row"><button class="btn danger small" data-act="reset">Tout effacer</button><button class="btn quiet small" data-act="close">Annuler</button></div></div>`; break;
     case "reset": S = blank(S.name); save(); closeSheet(); break;
   }
+});
+document.addEventListener("change", e => {
+  if (e.target.id !== "f-mat") return;
+  const ex = EX[e.target.value] || EX.Autre;
+  $("f-chap").placeholder = "ex. " + ex[0]; $("f-q").placeholder = "ex. " + ex[1]; $("f-r").placeholder = "ex. " + ex[2];
 });
 document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("sheet").hidden) closeSheet(); });
 render();
