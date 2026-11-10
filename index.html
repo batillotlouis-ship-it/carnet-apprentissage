@@ -1,0 +1,721 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1B3F6E">
+<title>Carnet d'apprentissage</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Carlito:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+/* Appli de poche : une colonne de 560px max, barre d'onglets en bas, feuilles plein écran pour la saisie */
+:root{
+  /* Charte Louis Batillot : navy, bleu moyen, bleu pâle, vert pâle (résultats validés), tan ; fond blanc, texte noir, pas de rouge */
+  --bg:#FFFFFF; --surface:#FFFFFF; --line:#D3DCE8; --fg:#000000; --muted:#555E6B;
+  --navy:#1B3F6E; --bleu:#2E5F94; --pale:#DDE8F4; --on-navy:#FFFFFF;
+  --tan:#9E742C; --tan-soft:#F3ECDF;
+  --vert:#2F7A4D; --vert-pale:#DDF0E3;
+  --passif:#C3CAD4; --ok:#2F7A4D; --mid:#9E742C; --ko:#7A828C;
+  --h1:#DDE8F4; --h2:#7FA0C6; --h3:#1B3F6E;
+  --display:Calibri,"Carlito","Segoe UI",Arial,sans-serif;
+  --body:Calibri,"Carlito","Segoe UI",Arial,sans-serif;
+  color-scheme:light;
+}
+
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+body.lock{overflow:hidden}
+*{box-sizing:border-box}
+h1,h2,h3{font-family:var(--display);line-height:1.2;margin:0;text-wrap:balance}
+h1{font-size:1.7rem;font-weight:700;color:var(--navy)}
+h2{font-size:1.2rem;font-weight:700;color:var(--navy)}
+h3{font-size:1.08rem;font-weight:700;color:var(--navy)}
+p{margin:0}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--bleu);outline-offset:2px}
+.wrap{max-width:560px;margin:0 auto;padding-block:12px calc(92px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:20px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{font-family:var(--display);font-weight:700;font-size:1rem;color:var(--navy)}
+.icon-btn{border:0;background:transparent;width:44px;height:44px;border-radius:12px;display:grid;place-items:center;color:var(--muted)}
+.icon-btn:hover{background:var(--pale);color:var(--navy)}
+.muted{color:var(--muted)}
+.small{font-size:.875rem}
+.label{font-size:.75rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.stack{display:flex;flex-direction:column;gap:12px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.banner{background:var(--tan-soft);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:10px;font-size:.9rem}
+.banner strong{font-family:var(--display);font-weight:600}
+.btn{border:0;border-radius:12px;min-height:48px;padding:10px 18px;font-weight:600;background:var(--navy);color:var(--on-navy);display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn.block{width:100%}
+.btn.ghost{background:transparent;color:var(--navy);border:1.5px solid var(--navy)}
+.btn.quiet{background:var(--surface);color:var(--fg);border:1px solid var(--line)}
+.btn.danger{background:var(--tan);color:#fff}
+.btn.small{min-height:40px;padding:8px 14px;font-size:.9rem}
+.btn:disabled{opacity:.45;cursor:default}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 14px;font-size:.92rem;line-height:1.25;text-align:left}
+.chip[aria-pressed="true"]{background:var(--navy);border-color:var(--navy);color:var(--on-navy)}
+.chip.passif[aria-pressed="true"]{background:var(--passif);border-color:var(--passif);color:var(--fg)}
+.tag{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--pale);color:var(--navy)}
+.tag.passif{background:var(--line);color:var(--muted)}
+
+/* Accueil */
+.hello p{margin-top:4px}
+.goal{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:14px;background:var(--pale);font-size:.95rem}
+.goal b{font-weight:600}
+.recall{background:var(--navy);color:var(--on-navy);border:0}
+.recall .big{font-family:var(--display);font-size:2.6rem;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.recall .btn{background:var(--on-navy);color:var(--navy)}
+.recall-head{display:flex;align-items:flex-end;gap:12px}
+.strip{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;text-align:center}
+.strip .d{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:.75rem;color:var(--muted)}
+.dot{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--line);background:transparent}
+.dot.on{background:var(--navy);border-color:var(--navy)}
+.dot.half{background:var(--passif);border-color:var(--passif)}
+.dot.today{box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--tan)}
+.sess{display:flex;flex-direction:column;gap:6px;padding:12px 0;border-top:1px solid var(--line)}
+.sess:first-child{border-top:0;padding-top:0}
+.sess-h{display:flex;justify-content:space-between;gap:8px;font-weight:600}
+
+/* Questions */
+.qitem{display:flex;gap:12px;align-items:center;width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.qitem .txt{flex:1;min-width:0}
+.qitem .q{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-weight:500}
+.qitem .meta{font-size:.8rem;color:var(--muted);margin-top:2px}
+.qside{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
+.steps{display:flex;gap:3px}
+.steps i{width:8px;height:8px;border-radius:2px;background:var(--line)}
+.steps i.on{background:var(--navy)}
+.due{font-size:.75rem;font-weight:600;color:var(--muted);white-space:nowrap}
+.due.now{color:var(--tan)}
+.due.done{color:var(--ok)}
+.hscroll{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.hscroll .chip{flex-shrink:0}
+.tip{font-size:.9rem;display:flex;flex-direction:column;gap:8px}
+.tip .good{color:var(--ok);font-weight:600}
+.tip .bad{color:var(--tan);font-weight:600}
+
+/* Semaine */
+.weeknav{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.weeknav h2{text-align:center;flex:1}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px;min-width:0}
+.tile .v{font-family:var(--display);font-size:1.5rem;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.1}
+.tile .k{font-size:.75rem;color:var(--muted);margin-top:4px}
+.tile.accent .v{color:var(--navy)}
+.insight{font-size:.98rem;padding:12px 14px;border-left:3px solid var(--tan);background:var(--tan-soft);border-radius:0 12px 12px 0}
+.bars{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;align-items:end}
+.bar{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0}
+.bar .col{width:100%;max-width:34px;height:120px;display:flex;flex-direction:column;justify-content:flex-end;border-radius:6px;background:repeating-linear-gradient(0deg,transparent 0 29px,var(--line) 29px 30px)}
+.bar .p{background:var(--passif);border-radius:6px 6px 0 0}
+.bar .a{background:var(--navy)}
+.bar .col .a:first-child{border-radius:6px 6px 0 0}
+.bar .n{font-size:.72rem;font-variant-numeric:tabular-nums;color:var(--muted);height:1.1em}
+.bar .l{font-size:.75rem;color:var(--muted);text-align:center;line-height:1.2}
+.bar .l b{display:block;color:var(--fg);font-weight:600}
+.legend{display:flex;gap:16px;font-size:.8rem;color:var(--muted);flex-wrap:wrap}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.hbar{display:grid;grid-template-columns:minmax(0,1fr) 2fr auto;gap:10px;align-items:center;font-size:.88rem}
+.hbar .track{height:10px;border-radius:5px;background:var(--line);overflow:hidden}
+.hbar .fill{height:100%;border-radius:5px;background:var(--navy)}
+.hbar .fill.passif{background:var(--passif)}
+.hbar .c{font-variant-numeric:tabular-nums;font-weight:600;min-width:1.5em;text-align:right}
+.hbar .nm{min-width:0;overflow-wrap:anywhere}
+.hbar.goal-line .nm{font-weight:600}
+.seg{display:flex;height:14px;border-radius:7px;overflow:hidden;background:var(--line)}
+.seg i{display:block;height:100%}
+.mem{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;text-align:center}
+.mem div{display:flex;flex-direction:column;gap:4px;align-items:center}
+.mem .v{font-family:var(--display);font-weight:600;font-size:1.2rem;font-variant-numeric:tabular-nums;width:100%;padding:8px 0;border-radius:10px;background:var(--pale);color:var(--navy)}
+.mem .last .v{background:var(--vert-pale);color:var(--vert)}
+.mem .k{font-size:.7rem;color:var(--muted)}
+.heat{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.heat .hd{font-size:.7rem;color:var(--muted);text-align:center}
+.heat .c{aspect-ratio:1;max-width:100%;border-radius:6px;background:var(--line)}
+.heat .c.l1{background:var(--h1)}.heat .c.l2{background:var(--h2)}.heat .c.l3{background:var(--h3)}
+.heat .c.t{box-shadow:inset 0 0 0 2px var(--tan)}
+.empty{padding:18px;text-align:center;color:var(--muted);border:1.5px dashed var(--line);border-radius:14px;font-size:.92rem}
+
+/* Barre d'onglets */
+.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);z-index:20;
+  padding-bottom:env(safe-area-inset-bottom,0px);padding-left:max(8px,env(safe-area-inset-left,0px));padding-right:max(8px,env(safe-area-inset-right,0px))}
+.tabs-in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr)}
+.tab{border:0;background:transparent;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px 10px;font-size:.75rem;font-weight:600;color:var(--muted);position:relative}
+.tab[aria-current="page"]{color:var(--navy)}
+.tab[aria-current="page"]::before{content:"";position:absolute;top:0;left:30%;right:30%;height:3px;border-radius:0 0 3px 3px;background:var(--navy)}
+.badge{position:absolute;top:4px;left:calc(50% + 8px);min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--tan);color:#fff;font-size:.68rem;display:grid;place-items:center}
+
+/* Feuilles */
+.sheet{position:fixed;inset:0;background:var(--bg);z-index:50;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.sheet-in{max-width:560px;margin:0 auto;padding-block:calc(env(safe-area-inset-top,0px) + 12px) calc(env(safe-area-inset-bottom,0px) + 28px);display:flex;flex-direction:column;gap:20px}
+.sheet-h{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.field{display:flex;flex-direction:column;gap:8px}
+.field > label,.field > .label{font-weight:600;font-size:.95rem;font-family:var(--display)}
+.field .hint{font-size:.82rem;color:var(--muted);margin-top:-4px}
+input[type=text],textarea,select{width:100%;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:12px 14px;font-size:16px}
+textarea{resize:vertical;min-height:84px}
+.group-t{font-size:.82rem;color:var(--muted);display:flex;align-items:center;gap:8px}
+.group-t i{width:10px;height:10px;border-radius:3px}
+.switch{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.switch button{flex-shrink:0;width:52px;height:30px;border-radius:15px;border:0;background:var(--line);position:relative}
+.switch button::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:var(--surface);transition:left .15s}
+.switch button[aria-pressed="true"]{background:var(--navy)}
+.switch button[aria-pressed="true"]::after{left:25px}
+.err{color:var(--tan);font-size:.88rem;font-weight:500}
+.done-box{display:flex;flex-direction:column;gap:14px;padding:22px 18px;border-radius:16px;background:var(--pale)}
+.done-box.valid{background:var(--vert-pale)}
+.foot{text-align:center;font-size:.8rem;color:var(--bleu);padding-top:8px;border-top:1px solid var(--line)}
+.foot b{color:var(--navy)}
+.done-box .big{font-family:var(--display);font-size:1.4rem;font-weight:600}
+.meter{height:10px;border-radius:5px;background:var(--line);overflow:hidden}
+.meter i{display:block;height:100%;background:var(--navy)}
+
+/* Rappels */
+.rv-progress{display:flex;gap:4px}
+.rv-progress i{flex:1;height:5px;border-radius:3px;background:var(--line)}
+.rv-progress i.on{background:var(--navy)}
+.rv-card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:22px 18px;display:flex;flex-direction:column;gap:16px;min-height:220px}
+.rv-q{font-family:var(--display);font-size:1.3rem;font-weight:400;line-height:1.35;overflow-wrap:anywhere}
+.rv-a{border-top:1px dashed var(--line);padding-top:14px;font-size:1.05rem;overflow-wrap:anywhere;white-space:pre-wrap}
+.rv-btns{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.rv-btns .btn{padding:10px 8px;font-size:.92rem}
+.b-ok{background:var(--ok);color:#fff}
+.b-mid{background:var(--mid);color:#fff}
+.b-ko{background:var(--ko);color:#fff}
+.confirm{display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:14px;border:1.5px solid var(--tan);background:var(--tan-soft)}
+code.save{display:block;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.75rem;word-break:break-all;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px;max-height:110px;overflow:auto;user-select:all}
+a{color:var(--navy)}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+@media (min-width:480px){.tiles .tile .v{font-size:1.7rem}}
+</style>
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+
+
+<div class="wrap" id="app">
+  <div class="top">
+    <span class="brand">Mon carnet d’apprentissage</span>
+    <button class="icon-btn" data-act="settings" aria-label="Réglages et sauvegarde">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+    </button>
+  </div>
+  <div id="notice"></div>
+  <main id="view" class="stack" style="gap:20px"></main>
+  <p class="foot"><b>Louis Batillot</b> - Cours particuliers Mathématiques / Physique-Chimie · Coaching scolaire</p>
+</div>
+
+<nav class="tabs" aria-label="Sections">
+  <div class="tabs-in">
+    <button class="tab" data-act="tab" data-tab="home">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>
+      Aujourd’hui<span class="badge" id="badge" hidden></span>
+    </button>
+    <button class="tab" data-act="tab" data-tab="questions">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="14" height="16" rx="2"/><path d="M7 2h12a2 2 0 0 1 2 2v14"/><path d="M8 11.5a2 2 0 1 1 2.5 1.9c-.4.1-.5.4-.5.8V15M10 18h0"/></svg>
+      Questions
+    </button>
+    <button class="tab" data-act="tab" data-tab="week">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>
+      Mon bilan
+    </button>
+  </div>
+</nav>
+
+<div class="sheet" id="sheet" hidden role="dialog" aria-modal="true"><div class="sheet-in" id="sheet-in"></div></div>
+
+<script>
+const KEY = "carnet-apprentissage-v1";
+const GAPS = [1, 2, 4, 7, 16];            // rappels à J+1, J+3, J+7, J+14, J+30
+const JALONS = ["J+1", "J+3", "J+7", "J+14", "J+30"];
+const TECH = [
+  {k:"test", l:"Me tester de tête", h:"feuille blanche, questions", a:true},
+  {k:"refaire", l:"Refaire un exercice sans regarder", a:true},
+  {k:"melanger", l:"Mélanger des types d’exercices", a:true},
+  {k:"erreurs", l:"Reprendre mes erreurs", a:true},
+  {k:"expliquer", l:"Expliquer à voix haute", a:true},
+  {k:"exemple", l:"Étudier un exemple corrigé puis le refaire", a:true},
+  {k:"relire", l:"Relire le cours", a:false},
+  {k:"surligner", l:"Surligner ou recopier", a:false},
+  {k:"correction", l:"Lire une correction", a:false}
+];
+const TK = Object.fromEntries(TECH.map(t => [t.k, t]));
+const MAT = ["Maths","Physique-chimie","SVT","SES","NSI","Français","Philosophie","Histoire-géo","Anglais","LV2","Autre"];
+const DUR = [15, 30, 45, 60, 90];
+const JOURS = ["dimanche","lundi","mardi","mercredi","jeudi","vendredi","samedi"];
+const J1 = ["D","L","M","M","J","V","S"];
+const MOIS = ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
+
+/* ---------- dates ---------- */
+const pad = n => String(n).padStart(2, "0");
+const iso = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const parse = s => { const [y,m,d] = s.split("-").map(Number); return new Date(y, m-1, d); };
+const today = () => iso(new Date());
+const add = (s, n) => { const d = parse(s); d.setDate(d.getDate() + n); return iso(d); };
+const diff = (a, b) => Math.round((parse(b) - parse(a)) / 86400000);
+const longDate = s => { const d = parse(s); return `${JOURS[d.getDay()]} ${d.getDate()} ${MOIS[d.getMonth()]}`; };
+const dayMonth = s => { const d = parse(s); return `${d.getDate()} ${MOIS[d.getMonth()]}`; };
+function rel(s){
+  const n = diff(today(), s);
+  if (n < 0) return "en retard";
+  if (n === 0) return "aujourd’hui";
+  if (n === 1) return "demain";
+  return `dans ${n} jours`;
+}
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const plural = (n, a, b) => n > 1 ? b : a;
+
+/* ---------- état ---------- */
+let storageOK = true;
+function blank(name){ return {v:1, demo:false, name:name || "", sessions:[], questions:[], bilans:[], objectif:null}; }
+function load(){
+  try { const raw = localStorage.getItem(KEY); return raw ? JSON.parse(raw) : null; }
+  catch(e){ storageOK = false; return null; }
+}
+function save(){
+  if (S.demo) return;
+  try { localStorage.setItem(KEY, JSON.stringify(S)); storageOK = true; }
+  catch(e){ storageOK = false; }
+}
+function newQuestion(mat, chap, q, r, date){
+  return {id:uid(), mat, chap, q, r, created:date, step:0, due:add(date, 1), done:false, history:[]};
+}
+function review(q, res, pred, date){
+  q.history.push({d:date, r:res, p:pred ? 1 : 0});
+  if (res === "su"){
+    q.step++;
+    if (q.step >= GAPS.length){ q.done = true; q.due = null; }
+    else q.due = add(date, GAPS[q.step]);
+  } else if (res === "mo"){
+    q.due = add(date, 1);
+  } else {
+    q.step = 0; q.due = add(date, 1);
+  }
+}
+const dueList = () => S.questions.filter(q => !q.done && q.due <= today()).sort((a,b) => a.due.localeCompare(b.due));
+
+/* ---------- exemple ---------- */
+function demoState(){
+  const t = today();
+  const s = blank("Léa"); s.demo = true;
+  const plan = [
+    [-20,"Maths",45,["relire","surligner"],0],
+    [-19,"Physique-chimie",30,["relire"],0],
+    [-17,"Maths",60,["relire","correction"],0],
+    [-15,"SVT",30,["surligner","relire"],0],
+    [-14,"Physique-chimie",45,["relire","test"],0],
+    [-13,"Maths",30,["correction","refaire"],1],
+    [-11,"Physique-chimie",30,["test","relire"],1],
+    [-10,"Maths",45,["refaire","exemple"],0],
+    [-8,"SVT",30,["test"],1],
+    [-7,"Maths",60,["melanger","erreurs","relire"],1],
+    [-6,"Physique-chimie",30,["test","erreurs"],1],
+    [-5,"Maths",45,["refaire","test"],1],
+    [-3,"Physique-chimie",45,["exemple","refaire","test"],1],
+    [-2,"Maths",30,["melanger","erreurs"],1],
+    [-1,"SVT",15,["test","expliquer"],1]
+  ];
+  s.sessions = plan.map(([o,m,d,tt,tel]) => ({id:uid(), d:add(t,o), mat:m, dur:d, t:tt, tel:!!tel}));
+  const map = {su:["su",1], mo:["mo",1], pas:["pas",0], pi:["pas",1]};
+  const mk = (off, mat, chap, q, r, res) => {
+    const o = newQuestion(mat, chap, q, r, add(t, off));
+    for (const x of res){ if (o.done || o.due >= t) break; review(o, map[x][0], map[x][1], o.due); }
+    return o;
+  };
+  const all = ["su","su","su","su","su"];
+  s.questions = [
+    mk(-32,"Maths","Second degré","Quelle est la formule du discriminant ?","Δ = b² − 4ac", all),
+    mk(-31,"Physique-chimie","Quantité de matière","Comment calculer une quantité de matière à partir d’une masse ?","n = m / M\n(m en g, M en g/mol, n en mol)", all),
+    mk(-20,"Maths","Second degré","Si Δ < 0, combien l’équation ax² + bx + c = 0 a-t-elle de solutions réelles ?","Aucune", ["su","su","pi","su","su","su"]),
+    mk(-19,"Physique-chimie","Solutions","Quelle relation relie concentration molaire, quantité de matière et volume ?","C = n / V", ["su","mo","su","su","su"]),
+    mk(-14,"Maths","Dérivation","Quelle est la dérivée de x ↦ xⁿ ?","x ↦ n·xⁿ⁻¹", ["pi","su","su","pi","su","su"]),
+    mk(-13,"Physique-chimie","Mouvement","Énonce la deuxième loi de Newton.","La somme des forces extérieures est égale à m·a (ΣF = m·a)", ["su","pas","su","su","su"]),
+    mk(-10,"Maths","Dérivation","Quelle est l’équation de la tangente à la courbe de f au point d’abscisse a ?","y = f′(a)(x − a) + f(a)", ["su","pi","su","su"]),
+    mk(-8,"SVT","Photosynthèse","Dans quel organite a lieu la photosynthèse ?","Dans les chloroplastes", ["su","su","su"]),
+    mk(-6,"Physique-chimie","Énergie","Quelle est l’expression de l’énergie cinétique ?","Ec = ½·m·v²\n(m en kg, v en m/s, Ec en J)", ["mo","su","su"]),
+    mk(-3,"Maths","Suites","Quel est le terme général d’une suite arithmétique de raison r ?","uₙ = u₀ + n·r", ["su","su"]),
+    mk(-2,"Maths","Suites","Comment montrer qu’une suite est géométrique ?","On montre que uₙ₊₁ / uₙ est constant (ou uₙ₊₁ = q·uₙ pour tout n)", ["pi"]),
+    mk(-1,"Physique-chimie","Énergie","Unité de l’énergie dans le système international ?","Le joule (J)", []),
+    mk(-1,"SVT","Photosynthèse","Quels sont les réactifs de la photosynthèse ?","Dioxyde de carbone et eau (avec la lumière comme source d’énergie)", [])
+  ];
+  s.bilans = [{d:add(t,-3), marche:"Faire mes rappels le matin dans le bus, ça prend 5 minutes.", change:"Je relis encore trop mes fiches de physique avant de me tester.", obj:"erreurs"}];
+  s.objectif = {k:"erreurs", d:add(t,-3)};
+  return s;
+}
+
+let S = load() || demoState();
+let tab = "home", weekOffset = 0, qFilter = "Toutes";
+
+/* ---------- statistiques ---------- */
+function stats(start, end){
+  const ss = S.sessions.filter(x => x.d >= start && x.d <= end);
+  const days = {}, tech = {};
+  let tot = 0, act = 0, tel = 0;
+  for (const x of ss){
+    const n = x.t.length || 1;
+    const a = x.t.filter(k => TK[k] && TK[k].a).length;
+    const ac = x.dur * a / n;
+    tot += x.dur; act += ac;
+    days[x.d] = days[x.d] || {tot:0, act:0};
+    days[x.d].tot += x.dur; days[x.d].act += ac;
+    x.t.forEach(k => tech[k] = (tech[k] || 0) + 1);
+    if (x.tel) tel++;
+  }
+  const rev = {su:0, mo:0, pas:0, piege:0, n:0};
+  for (const q of S.questions) for (const h of q.history){
+    if (h.d < start || h.d > end) continue;
+    rev.n++; rev[h.r]++; if (h.p && h.r === "pas") rev.piege++;
+  }
+  return {ss, tot, act, days, tech, tel, rev, nbDays:Object.keys(days).length};
+}
+const pct = (a, b) => b ? Math.round(100 * a / b) : 0;
+const fmtMin = m => m >= 60 ? `${Math.floor(m/60)} h${m % 60 ? " " + pad(m % 60) : ""}` : `${m} min`;
+
+/* ---------- rendu ---------- */
+const $ = id => document.getElementById(id);
+function render(){
+  document.querySelectorAll(".tab").forEach(b => b.setAttribute("aria-current", b.dataset.tab === tab ? "page" : "false"));
+  const n = dueList().length;
+  $("badge").hidden = !n; $("badge").textContent = n;
+  let notice = "";
+  if (S.demo) notice = `<div class="banner"><div><strong>Exemple.</strong> Voici le carnet fictif de Léa, lycéenne, après trois semaines. Tu peux tout essayer, rien n’est gardé.</div><button class="btn small" data-act="start">Commencer mon carnet</button></div>`;
+  else if (!storageOK) notice = `<div class="banner"><div><strong>Attention.</strong> Ce navigateur ne garde pas ton carnet (navigation privée ?). Ouvre-le dans ton navigateur habituel pour ne rien perdre.</div></div>`;
+  $("notice").innerHTML = notice;
+  $("view").innerHTML = tab === "home" ? viewHome() : tab === "questions" ? viewQuestions() : viewWeek();
+}
+
+function viewHome(){
+  const t = today(), due = dueList();
+  const last7 = stats(add(t,-6), t);
+  let h = `<div class="hello"><h1>Bonjour${S.name ? " " + esc(S.name) : ""}</h1><p class="muted">On est ${longDate(t)}.</p></div>`;
+  if (S.objectif && TK[S.objectif.k]){
+    const used = last7.tech[S.objectif.k] || 0;
+    h += `<div class="goal"><div>Mon objectif de la semaine&nbsp;: <b>${esc(TK[S.objectif.k].l.toLowerCase())}</b>. Utilisé ${used} fois ces 7 derniers jours.</div></div>`;
+  }
+  h += `<section class="card recall"><div class="recall-head"><span class="big">${due.length}</span><span>${due.length ? plural(due.length,"question à me reposer aujourd’hui","questions à me reposer aujourd’hui") : "Aucun rappel aujourd’hui"}</span></div>`;
+  h += due.length
+    ? `<p class="small">Réponds de tête avant de regarder la réponse. Compte environ 1 minute par question.</p><button class="btn block" data-act="review">Faire mes rappels</button>`
+    : `<p class="small">Après ton prochain cours, écris 3 à 5 questions sur ce qu’il faut savoir. Elles reviendront ici au bon moment.</p>`;
+  h += `</section>`;
+  h += `<button class="btn block" data-act="log" style="background:var(--tan);color:#fff;min-height:56px;font-size:1.05rem">+ Noter une séance de travail</button>`;
+  const todays = S.sessions.filter(x => x.d === t);
+  h += `<section class="stack"><h2>Aujourd’hui</h2>`;
+  h += todays.length ? `<div class="card">${todays.map(sessRow).join("")}</div>` : `<div class="empty">Rien de noté pour l’instant. Note ta séance juste après l’avoir faite, ça prend 20 secondes.</div>`;
+  h += `</section>`;
+  h += `<section class="stack"><div class="row" style="justify-content:space-between"><h2>Mes 7 derniers jours</h2><button class="btn quiet small" data-act="tab" data-tab="week">Voir mon bilan</button></div><div class="strip">`;
+  for (let i = 6; i >= 0; i--){
+    const d = add(t, -i), x = last7.days[d];
+    const cls = x ? (x.act > 0 ? "on" : "half") : "";
+    h += `<div class="d"><span class="dot ${cls} ${i === 0 ? "today" : ""}" title="${x ? fmtMin(x.tot) : "pas de séance"}"></span>${J1[parse(d).getDay()]}</div>`;
+  }
+  h += `</div><div class="legend"><span><i style="background:var(--navy)"></i>travail actif</span><span><i style="background:var(--passif)"></i>seulement passif</span></div></section>`;
+  return h;
+}
+function sessRow(x){
+  const tags = x.t.map(k => `<span class="tag ${TK[k].a ? "" : "passif"}">${esc(TK[k].l)}</span>`).join(" ");
+  return `<div class="sess"><div class="sess-h"><span>${esc(x.mat)}</span><span class="muted">${fmtMin(x.dur)}</span></div><div class="row" style="gap:6px">${tags}</div>${x.tel ? `<span class="small muted">Téléphone dans une autre pièce</span>` : ""}<div><button class="btn quiet small" data-act="delsess" data-id="${x.id}" style="min-height:34px;padding:4px 10px;font-size:.8rem">Supprimer</button></div></div>`;
+}
+
+function viewQuestions(){
+  const due = dueList().length;
+  const done = S.questions.filter(q => q.done).length;
+  const mats = ["Toutes", ...MAT.filter(m => S.questions.some(q => q.mat === m))];
+  if (!mats.includes(qFilter)) qFilter = "Toutes";
+  let list = S.questions.filter(q => qFilter === "Toutes" || q.mat === qFilter);
+  list.sort((a,b) => (a.done - b.done) || (a.due || "").localeCompare(b.due || ""));
+  let h = `<div class="row" style="justify-content:space-between"><h1>Mes questions</h1><button class="btn small" data-act="addq">+ Ajouter</button></div>`;
+  h += `<p class="muted small">${S.questions.length} ${plural(S.questions.length,"question","questions")} · ${due} à revoir aujourd’hui · ${done} ${plural(done,"acquise","acquises")}</p>`;
+  if (mats.length > 2) h += `<div class="hscroll">${mats.map(m => `<button class="chip" data-act="qfilter" data-m="${esc(m)}" aria-pressed="${m === qFilter}">${esc(m)}</button>`).join("")}</div>`;
+  if (!list.length) h += `<div class="empty">Ta banque est vide. Après chaque cours, ajoute 3 à 5 questions sur ce qu’il faut savoir par cœur ou savoir refaire.</div>`;
+  h += `<div class="stack" style="gap:8px">${list.map(q => {
+    const dots = GAPS.map((_, i) => `<i class="${i < q.step || q.done ? "on" : ""}"></i>`).join("");
+    const lab = q.done ? `<span class="due done">Acquise</span>` : `<span class="due ${q.due <= today() ? "now" : ""}">${q.due <= today() ? "à revoir" : rel(q.due)}</span>`;
+    return `<button class="qitem" data-act="editq" data-id="${q.id}"><span class="txt"><span class="q">${esc(q.q)}</span><span class="meta" style="display:block">${esc(q.mat)}${q.chap ? " · " + esc(q.chap) : ""}</span></span><span class="qside"><span class="steps" title="Rappels réussis">${dots}</span>${lab}</span></button>`;
+  }).join("")}</div>`;
+  h += `<section class="card tip"><h3>Écrire une bonne question</h3><p>La question doit appeler une réponse précise, que tu peux vérifier.</p><p><span class="good">Oui</span>&nbsp;: «&nbsp;Quelle est l’expression de l’énergie cinétique&nbsp;?&nbsp;»</p><p><span class="bad">Non</span>&nbsp;: «&nbsp;Le chapitre sur l’énergie.&nbsp;»</p><p class="muted small">Chaque question revient à J+1, J+3, J+7, J+14 et J+30. Si tu la rates, elle repart à J+1. Après le rappel de J+30 réussi, elle est acquise.</p></section>`;
+  return h;
+}
+
+function viewWeek(){
+  const t = today();
+  const end = add(t, -7 * weekOffset), start = add(end, -6);
+  const st = stats(start, end), prev = stats(add(start,-7), add(start,-1));
+  const actP = pct(st.act, st.tot), prevP = pct(prev.act, prev.tot);
+  const title = weekOffset === 0 ? "Mes 7 derniers jours" : `Du ${dayMonth(start)} au ${dayMonth(end)}`;
+  let h = `<div class="weeknav"><button class="icon-btn" data-act="wk" data-d="1" aria-label="7 jours précédents"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><h2>${title}</h2><button class="icon-btn" data-act="wk" data-d="-1" aria-label="7 jours suivants" ${weekOffset === 0 ? "disabled style=\"opacity:.3\"" : ""}><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button></div>`;
+  h += `<div class="tiles"><div class="tile"><div class="v">${st.nbDays}<span class="muted" style="font-size:.9rem">/7</span></div><div class="k">jours de travail</div></div><div class="tile"><div class="v">${st.tot ? fmtMin(st.tot) : "0"}</div><div class="k">de travail noté</div></div><div class="tile accent"><div class="v">${actP}&nbsp;%</div><div class="k">de temps actif</div></div></div>`;
+  if (st.tot){
+    let ins;
+    if (prev.tot && actP !== prevP) ins = `${actP > prevP ? "Ton travail devient plus actif" : "Ton travail est moins actif"}&nbsp;: ${actP}&nbsp;% du temps contre ${prevP}&nbsp;% les 7 jours d’avant.`;
+    else if (actP >= 60) ins = `La majorité de ton temps sert à faire travailler ta mémoire. C’est ce qui fait retenir.`;
+    else ins = `Une grande partie de ton temps reste passive. Termine chaque séance par 5 minutes à te tester de tête.`;
+    h += `<p class="insight">${ins}</p>`;
+  }
+  // barres par jour
+  let max = 60; for (const k in st.days) max = Math.max(max, st.days[k].tot);
+  h += `<section class="card"><h3>Mon temps de travail</h3><div class="bars">`;
+  for (let i = 0; i < 7; i++){
+    const d = add(start, i), x = st.days[d] || {tot:0, act:0};
+    const hp = 120 * (x.tot - x.act) / max, ha = 120 * x.act / max;
+    h += `<div class="bar"><span class="n">${x.tot ? x.tot : ""}</span><div class="col">${hp > 0.5 ? `<i class="p" style="height:${hp}px;display:block"></i>` : ""}${ha > 0.5 ? `<i class="a" style="height:${ha}px;display:block${hp > 0.5 ? "" : ";border-radius:6px 6px 0 0"}"></i>` : ""}</div><span class="l"><b>${J1[parse(d).getDay()]}</b>${parse(d).getDate()}</span></div>`;
+  }
+  h += `</div><div class="legend"><span><i style="background:var(--navy)"></i>actif</span><span><i style="background:var(--passif)"></i>passif</span><span>en minutes</span></div></section>`;
+  // techniques
+  const used = TECH.filter(x => st.tech[x.k]).sort((a,b) => st.tech[b.k] - st.tech[a.k]);
+  const tmax = Math.max(1, ...used.map(x => st.tech[x.k]));
+  h += `<section class="card"><h3>Ce que j’ai fait</h3>`;
+  if (used.length){
+    h += used.map(x => `<div class="hbar ${S.objectif && S.objectif.k === x.k ? "goal-line" : ""}"><span class="nm">${esc(x.l)}${S.objectif && S.objectif.k === x.k ? " (objectif)" : ""}</span><span class="track"><span class="fill ${x.a ? "" : "passif"}" style="width:${100 * st.tech[x.k] / tmax}%;display:block"></span></span><span class="c">${st.tech[x.k]}</span></div>`).join("");
+    if (S.objectif && TK[S.objectif.k] && !st.tech[S.objectif.k] && weekOffset === 0) h += `<p class="small muted">Ton objectif «&nbsp;${esc(TK[S.objectif.k].l.toLowerCase())}&nbsp;» n’apparaît pas encore.</p>`;
+  } else h += `<div class="empty">Pas de séance notée sur ces 7 jours.</div>`;
+  h += `<p class="small muted">Téléphone dans une autre pièce&nbsp;: ${st.tel} ${plural(st.tel,"séance","séances")} sur ${st.ss.length}.</p></section>`;
+  // rappels
+  const r = st.rev;
+  h += `<section class="card"><h3>Mes rappels</h3>`;
+  if (r.n){
+    h += `<p>${r.n} ${plural(r.n,"question reposée","questions reposées")}&nbsp;: ${r.su} ${plural(r.su,"juste","justes")}, ${r.mo} à moitié, ${r.pas} ${plural(r.pas,"ratée","ratées")}.</p>`;
+    h += `<div class="seg" role="img" aria-label="${r.su} justes, ${r.mo} à moitié, ${r.pas} ratées"><i style="width:${pct(r.su,r.n)}%;background:var(--ok)"></i><i style="width:${pct(r.mo,r.n)}%;background:var(--mid)"></i><i style="width:${100 - pct(r.su,r.n) - pct(r.mo,r.n)}%;background:var(--ko)"></i></div>`;
+    h += r.piege
+      ? `<p class="small"><b>Piège du «&nbsp;je connais&nbsp;»&nbsp;: ${r.piege} ${plural(r.piege,"fois","fois")}.</b> Tu pensais avoir la réponse et elle était fausse. C’est exactement ce que la relecture cache, et ce que les rappels révèlent.</p>`
+      : `<p class="small muted">Aucun piège du «&nbsp;je connais&nbsp;» : quand tu pensais savoir, tu savais.</p>`;
+  } else h += `<div class="empty">Aucun rappel fait sur ces 7 jours.</div>`;
+  h += `</section>`;
+  // mémoire
+  const steps = [0,0,0,0,0,0];
+  S.questions.forEach(q => steps[q.done ? 5 : q.step]++);
+  h += `<section class="card"><h3>Ma mémoire à long terme</h3><p class="small muted">Où en sont tes ${S.questions.length} questions. Chacune avance d’une case à chaque rappel réussi.</p><div class="mem">${steps.map((v,i) => `<div class="${i === 5 ? "last" : ""}"><span class="v">${v}</span><span class="k">${i < 5 ? "vers " + JALONS[i] : "acquises"}</span></div>`).join("")}</div></section>`;
+  // régularité
+  if (weekOffset === 0){
+    const all = stats(add(t,-27), t);
+    h += `<section class="card"><h3>Ma régularité sur 4 semaines</h3><div class="heat">`;
+    for (let i = 0; i < 7; i++) h += `<span class="hd">${J1[parse(add(t,-27 + i)).getDay()]}</span>`;
+    for (let i = 27; i >= 0; i--){
+      const d = add(t, -i), x = all.days[d], m = x ? x.tot : 0;
+      const l = !m ? "" : m < 30 ? "l1" : m < 60 ? "l2" : "l3";
+      h += `<span class="c ${l} ${i === 0 ? "t" : ""}" title="${dayMonth(d)} : ${m ? fmtMin(m) : "rien"}"></span>`;
+    }
+    h += `</div><div class="legend"><span><i style="background:var(--line)"></i>rien</span><span><i style="background:var(--h1)"></i>moins de 30 min</span><span><i style="background:var(--h2)"></i>30 à 59 min</span><span><i style="background:var(--h3)"></i>1 h et plus</span></div><p class="small muted">Un peu chaque jour fait plus retenir qu’une longue séance le dimanche.</p></section>`;
+    // bilan
+    const b = S.bilans.filter(x => x.d > add(t,-7)).sort((a,b) => b.d.localeCompare(a.d))[0];
+    if (b){
+      h += `<section class="card"><h3>Mon bilan du ${dayMonth(b.d)}</h3><div><span class="label">Ce qui a marché</span><p>${esc(b.marche) || "—"}</p></div><div><span class="label">Ce que je change</span><p>${esc(b.change) || "—"}</p></div><div><span class="label">Mon objectif</span><p>${esc(TK[b.obj] ? TK[b.obj].l : "")}</p></div></section>`;
+    } else {
+      h += `<section class="card" style="border:1.5px solid var(--navy)"><h3>Mon bilan de la semaine</h3><p class="small">Trois questions, deux minutes. Regarde tes chiffres au-dessus, puis réponds.</p><button class="btn block" data-act="bilan">Faire mon bilan</button></section>`;
+    }
+  }
+  return h;
+}
+
+/* ---------- feuilles ---------- */
+let sheetState = {};
+function openSheet(html){
+  $("sheet-in").innerHTML = html;
+  $("sheet").hidden = false; $("sheet").scrollTop = 0;
+  document.body.classList.add("lock");
+}
+function closeSheet(){
+  $("sheet").hidden = true; document.body.classList.remove("lock");
+  sheetState = {}; render();
+}
+const sheetHead = (t) => `<div class="sheet-h"><h1 style="font-size:1.35rem">${t}</h1><button class="btn quiet small" data-act="close">Fermer</button></div>`;
+
+function sheetLog(){
+  const st = sheetState;
+  const recent = [...new Set(S.sessions.slice().sort((a,b) => b.d.localeCompare(a.d)).map(x => x.mat))];
+  const mats = [...recent, ...MAT.filter(m => !recent.includes(m))];
+  let h = sheetHead("Ma séance de travail");
+  h += `<div class="field"><span class="label" style="font-family:var(--display);text-transform:none;letter-spacing:0;color:var(--fg);font-size:.95rem">Quand&nbsp;?</span><div class="row">${["Aujourd’hui","Hier"].map((l,i) => `<button class="chip" data-act="set" data-k="when" data-v="${i}" aria-pressed="${st.when == i}">${l}</button>`).join("")}</div></div>`;
+  h += `<div class="field"><span class="label" style="font-family:var(--display);text-transform:none;letter-spacing:0;color:var(--fg);font-size:.95rem">Matière</span><div class="row">${mats.map(m => `<button class="chip" data-act="set" data-k="mat" data-v="${esc(m)}" aria-pressed="${st.mat === m}">${esc(m)}</button>`).join("")}</div></div>`;
+  h += `<div class="field"><span class="label" style="font-family:var(--display);text-transform:none;letter-spacing:0;color:var(--fg);font-size:.95rem">Durée</span><div class="row">${DUR.map(d => `<button class="chip" data-act="set" data-k="dur" data-v="${d}" aria-pressed="${st.dur == d}">${d === 90 ? "1 h 30 et +" : fmtMin(d)}</button>`).join("")}</div></div>`;
+  h += `<div class="field"><span class="label" style="font-family:var(--display);text-transform:none;letter-spacing:0;color:var(--fg);font-size:.95rem">Ce que j’ai fait</span><p class="hint">Coche tout ce que tu as vraiment fait.</p>`;
+  h += `<div class="group-t"><i style="background:var(--navy)"></i>Méthodes actives&nbsp;: ma mémoire travaille</div><div class="row">${TECH.filter(x => x.a).map(x => `<button class="chip" data-act="tech" data-v="${x.k}" aria-pressed="${st.t.includes(x.k)}">${esc(x.l)}</button>`).join("")}</div>`;
+  h += `<div class="group-t" style="margin-top:6px"><i style="background:var(--passif)"></i>Méthodes passives&nbsp;: je regarde</div><div class="row">${TECH.filter(x => !x.a).map(x => `<button class="chip passif" data-act="tech" data-v="${x.k}" aria-pressed="${st.t.includes(x.k)}">${esc(x.l)}</button>`).join("")}</div></div>`;
+  h += `<div class="switch"><span>Mon téléphone était dans une autre pièce</span><button data-act="tel" aria-pressed="${!!st.tel}" aria-label="Téléphone dans une autre pièce"></button></div>`;
+  if (st.err) h += `<p class="err">${st.err}</p>`;
+  h += `<button class="btn block" data-act="savelog" style="min-height:54px">Enregistrer ma séance</button>`;
+  openSheet(h);
+}
+function sheetLogDone(x){
+  const a = x.t.filter(k => TK[k].a).length, n = x.t.length;
+  const p = Math.round(100 * a / n);
+  let msg;
+  if (a === 0) msg = `Cette séance était entièrement passive. Relire donne l’impression de savoir sans le vérifier. La prochaine fois, garde 5 minutes à la fin pour te tester de tête.`;
+  else if (a < n) msg = `Bonne séance. Pour qu’elle compte encore plus, remplace un moment de relecture par un test de tête.`;
+  else msg = `Séance entièrement active : c’est ce type de travail qui fait retenir.`;
+  let h = sheetHead("Séance enregistrée");
+  h += `<div class="done-box ${a === n ? "valid" : ""}"><span class="big">${esc(x.mat)} · ${fmtMin(x.dur)}</span><div class="meter" aria-label="${p} % actif"><i style="width:${p}%"></i></div><span class="small muted">${p}&nbsp;% de méthodes actives</span><p>${msg}</p></div>`;
+  h += `<div class="card"><h3>Et maintenant&nbsp;?</h3><p class="small">Écris 3 à 5 questions sur ce que tu viens de travailler. Elles reviendront demain, puis dans 3, 7, 14 et 30 jours.</p><button class="btn block" data-act="addq" data-mat="${esc(x.mat)}">Écrire mes questions</button></div>`;
+  h += `<button class="btn quiet block" data-act="close">Plus tard</button>`;
+  openSheet(h);
+}
+
+function sheetQuestion(q, presetMat){
+  const prev = sheetState;
+  sheetState = {qid: q ? q.id : null, count: prev.count || 0, chap: prev.chap || ""};
+  const mat = q ? q.mat : (presetMat || prev.mat || "Maths");
+  let h = sheetHead(q ? "Modifier la question" : "Nouvelle question");
+  if (!q && sheetState.count) h += `<p class="small" style="color:var(--ok);font-weight:600">${sheetState.count} ${plural(sheetState.count,"question ajoutée","questions ajoutées")}. Continue ou ferme.</p>`;
+  h += `<div class="field"><label for="f-mat">Matière</label><select id="f-mat">${MAT.map(m => `<option ${m === mat ? "selected" : ""}>${esc(m)}</option>`).join("")}</select></div>`;
+  h += `<div class="field"><label for="f-chap">Chapitre <span class="muted small">(facultatif)</span></label><input type="text" id="f-chap" value="${esc(q ? q.chap : sheetState.chap || "")}" placeholder="ex. Dérivation"></div>`;
+  h += `<div class="field"><label for="f-q">Question</label><textarea id="f-q" placeholder="ex. Quelle est la dérivée de x ↦ xⁿ ?">${esc(q ? q.q : "")}</textarea></div>`;
+  h += `<div class="field"><label for="f-r">Réponse</label><p class="hint">Facultatif. Sinon, tu vérifieras dans ton cours.</p><textarea id="f-r" placeholder="ex. x ↦ n·xⁿ⁻¹">${esc(q ? q.r : "")}</textarea></div>`;
+  h += `<p class="err" id="f-err" hidden>Écris la question avant d’enregistrer.</p>`;
+  if (q){
+    h += `<button class="btn block" data-act="saveq">Enregistrer</button>`;
+    h += `<p class="small muted">${q.done ? "Question acquise." : `Prochain rappel ${rel(q.due)} (${JALONS[q.step]}).`} Créée le ${dayMonth(q.created)}.</p>`;
+    h += `<div id="delzone"><button class="btn quiet block" data-act="askdelq" style="color:var(--ko)">Supprimer cette question</button></div>`;
+  } else {
+    h += `<button class="btn block" data-act="saveq" data-more="1">Ajouter et en écrire une autre</button><button class="btn ghost block" data-act="saveq">Ajouter et fermer</button>`;
+  }
+  openSheet(h);
+  if (!q) setTimeout(() => { const el = $("f-q"); if (el) el.focus(); }, 50);
+}
+
+function sheetReview(){
+  const st = sheetState;
+  if (st.i >= st.queue.length) return reviewEnd();
+  const q = S.questions.find(x => x.id === st.queue[st.i]);
+  let h = sheetHead("Mes rappels");
+  h += `<div class="rv-progress">${st.queue.map((_, i) => `<i class="${i < st.i ? "on" : ""}"></i>`).join("")}</div>`;
+  h += `<div class="rv-card"><div class="row" style="justify-content:space-between"><span class="tag">${esc(q.mat)}${q.chap ? " · " + esc(q.chap) : ""}</span><span class="small muted">${st.i + 1} / ${st.queue.length}</span></div><p class="rv-q">${esc(q.q)}</p>`;
+  if (st.phase === "ask"){
+    h += `<p class="small muted">Réponds dans ta tête ou sur une feuille, sans regarder ton cours.</p></div>`;
+    h += `<button class="btn block" data-act="rv-have" style="min-height:54px">J’ai ma réponse</button><button class="btn quiet block" data-act="rv-dunno">Je ne sais plus</button>`;
+  } else if (st.phase === "check"){
+    h += `<div class="rv-a">${q.r ? esc(q.r) : `<span class="muted">Pas de réponse écrite. Vérifie dans ton cours.</span>`}</div></div>`;
+    h += `<p style="font-weight:600;font-family:var(--display)">Ta réponse était…</p><div class="rv-btns"><button class="btn b-ok" data-act="rv-res" data-r="su">Juste</button><button class="btn b-mid" data-act="rv-res" data-r="mo">À moitié</button><button class="btn b-ko" data-act="rv-res" data-r="pas">Fausse</button></div>`;
+  } else {
+    h += `<div class="rv-a">${q.r ? esc(q.r) : `<span class="muted">Pas de réponse écrite. Vérifie dans ton cours.</span>`}</div></div>`;
+    h += `<p class="small">Pas grave&nbsp;: c’est en cherchant qu’on retient. Lis bien la réponse, elle revient demain.</p><button class="btn block" data-act="rv-next">Question suivante</button>`;
+  }
+  openSheet(h);
+}
+function reviewEnd(){
+  const r = sheetState.res;
+  let h = sheetHead("Rappels terminés");
+  const n = r.su + r.mo + r.pas;
+  h += `<div class="done-box"><span class="big">${n} ${plural(n,"question","questions")} ${plural(n,"reposée","reposées")}</span><div class="seg"><i style="width:${pct(r.su,n)}%;background:var(--ok)"></i><i style="width:${pct(r.mo,n)}%;background:var(--mid)"></i><i style="width:${100 - pct(r.su,n) - pct(r.mo,n)}%;background:var(--ko)"></i></div><p>${r.su} ${plural(r.su,"juste","justes")}, ${r.mo} à moitié, ${r.pas} ${plural(r.pas,"ratée","ratées")}.</p>`;
+  if (r.pas + r.mo) h += `<p class="small">Les questions ratées ou à moitié reviennent demain. Les autres avancent d’une étape.</p>`;
+  if (r.piege) h += `<p class="small"><b>${r.piege} ${plural(r.piege,"fois","fois")}, tu pensais savoir et ta réponse était fausse.</b> C’est le piège du «&nbsp;je connais&nbsp;»&nbsp;: sans ce rappel, tu ne l’aurais découvert qu’au contrôle.</p>`;
+  h += `</div><button class="btn block" data-act="close">Terminer</button>`;
+  openSheet(h);
+}
+
+function sheetBilan(){
+  const st = stats(add(today(),-6), today());
+  let h = sheetHead("Mon bilan de la semaine");
+  h += `<p class="small muted">Cette semaine&nbsp;: ${st.nbDays} ${plural(st.nbDays,"jour","jours")} de travail, ${pct(st.act, st.tot)}&nbsp;% de temps actif, ${st.rev.n} ${plural(st.rev.n,"rappel","rappels")}.</p>`;
+  h += `<div class="field"><label for="b-1">Qu’est-ce qui a bien marché&nbsp;?</label><textarea id="b-1" placeholder="ex. Faire mes rappels le matin dans le bus."></textarea></div>`;
+  h += `<div class="field"><label for="b-2">Qu’est-ce que je veux changer&nbsp;?</label><textarea id="b-2" placeholder="ex. J’ai encore trop relu avant de me tester."></textarea></div>`;
+  h += `<div class="field"><span class="label" style="font-family:var(--display);text-transform:none;letter-spacing:0;color:var(--fg);font-size:.95rem">Mon objectif pour la semaine qui vient</span><p class="hint">Une seule méthode, que tu vas utiliser plus souvent.</p><div class="row">${TECH.filter(x => x.a).map(x => `<button class="chip" data-act="setobj" data-v="${x.k}" aria-pressed="${sheetState.obj === x.k}">${esc(x.l)}</button>`).join("")}</div></div>`;
+  h += `<p class="err" id="b-err" hidden>Choisis un objectif.</p><button class="btn block" data-act="savebilan">Enregistrer mon bilan</button>`;
+  openSheet(h);
+}
+
+function sheetSettings(){
+  const code = (() => { try { return btoa(unescape(encodeURIComponent(JSON.stringify(S)))); } catch(e){ return ""; } })();
+  let h = sheetHead("Réglages");
+  if (!S.demo){
+    h += `<div class="field"><label for="s-name">Mon prénom</label><input type="text" id="s-name" value="${esc(S.name)}"></div><button class="btn quiet block" data-act="savename">Enregistrer le prénom</button>`;
+  }
+  h += `<section class="card"><h3>Sauvegarder mon carnet</h3><p class="small">Ton carnet est enregistré sur cet appareil, dans ce navigateur. Pour le garder en sécurité ou le passer sur un autre appareil, copie ce code et garde-le (par exemple dans tes notes).</p><code class="save" id="s-code">${esc(code)}</code><button class="btn ghost block" data-act="copy">Copier le code</button><p class="small" id="s-copied" hidden style="color:var(--ok);font-weight:600">Code copié.</p></section>`;
+  h += `<section class="card"><h3>Restaurer un carnet</h3><p class="small">Colle un code de sauvegarde. Il remplace le carnet actuel.</p><textarea id="s-import" placeholder="Colle ton code ici"></textarea><p class="err" id="s-err" hidden>Ce code n’est pas valide. Vérifie que tu l’as copié en entier.</p><button class="btn quiet block" data-act="import">Restaurer</button></section>`;
+  if (!S.demo) h += `<div id="resetzone"><button class="btn quiet block" data-act="askreset" style="color:var(--ko)">Effacer tout mon carnet</button></div>`;
+  h += `<p class="small muted">Outil associé au livret «&nbsp;Apprendre à apprendre&nbsp;». Louis Batillot, cours de maths et physique-chimie, <a href="https://louisbatillot.fr" target="_blank" rel="noopener">louisbatillot.fr</a></p>`;
+  openSheet(h);
+}
+
+function sheetStart(){
+  let h = sheetHead("Mon carnet");
+  h += `<p>Ton carnet sert à voir comment tu apprends vraiment. Note chaque séance de travail en 20 secondes, écris tes questions après chaque cours, et fais tes rappels chaque jour.</p>`;
+  h += `<div class="field"><label for="st-name">Mon prénom</label><input type="text" id="st-name" placeholder="ex. Léa"></div>`;
+  h += `<button class="btn block" data-act="create">Créer mon carnet</button><p class="small muted">L’exemple de Léa sera effacé. Ton carnet reste sur cet appareil.</p>`;
+  openSheet(h);
+}
+
+/* ---------- actions ---------- */
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-act]"); if (!b) return;
+  const act = b.dataset.act, st = sheetState;
+  switch (act){
+    case "tab": tab = b.dataset.tab; if (tab === "week") weekOffset = 0; render(); window.scrollTo(0,0); break;
+    case "close": closeSheet(); break;
+    case "settings": sheetSettings(); break;
+    case "start": sheetStart(); break;
+    case "create": { const n = $("st-name").value.trim(); S = blank(n); save(); closeSheet(); break; }
+    case "log": sheetState = {when:0, mat:null, dur:null, t:[], tel:false}; sheetLog(); break;
+    case "set": st[b.dataset.k] = b.dataset.v; st.err = ""; sheetLog(); break;
+    case "tech": { const k = b.dataset.v; st.t = st.t.includes(k) ? st.t.filter(x => x !== k) : [...st.t, k]; st.err = ""; sheetLog(); break; }
+    case "tel": st.tel = !st.tel; sheetLog(); break;
+    case "savelog": {
+      if (!st.mat || !st.dur || !st.t.length){ st.err = "Choisis la matière, la durée et au moins une chose que tu as faite."; sheetLog(); break; }
+      const x = {id:uid(), d:add(today(), -Number(st.when)), mat:st.mat, dur:Number(st.dur), t:st.t, tel:!!st.tel};
+      S.sessions.push(x); save(); sheetState = {}; sheetLogDone(x); break;
+    }
+    case "delsess": S.sessions = S.sessions.filter(x => x.id !== b.dataset.id); save(); render(); break;
+    case "addq": sheetState = {count:0, mat:b.dataset.mat}; sheetQuestion(null, b.dataset.mat); break;
+    case "editq": sheetQuestion(S.questions.find(q => q.id === b.dataset.id)); break;
+    case "saveq": {
+      const qt = $("f-q").value.trim(), mat = $("f-mat").value, chap = $("f-chap").value.trim(), r = $("f-r").value.trim();
+      if (!qt){ $("f-err").hidden = false; break; }
+      if (st.qid){ const q = S.questions.find(x => x.id === st.qid); Object.assign(q, {q:qt, mat, chap, r}); save(); closeSheet(); }
+      else {
+        S.questions.push(newQuestion(mat, chap, qt, r, today())); save();
+        if (b.dataset.more){ const c = (st.count || 0) + 1; sheetState = {count:c, mat, chap}; sheetQuestion(null, mat); }
+        else closeSheet();
+      }
+      break;
+    }
+    case "askdelq": $("delzone").innerHTML = `<div class="confirm"><p>Supprimer cette question et son historique&nbsp;?</p><div class="row"><button class="btn danger small" data-act="delq">Supprimer</button><button class="btn quiet small" data-act="canceldel">Annuler</button></div></div>`; break;
+    case "canceldel": $("delzone").innerHTML = `<button class="btn quiet block" data-act="askdelq" style="color:var(--ko)">Supprimer cette question</button>`; break;
+    case "delq": S.questions = S.questions.filter(x => x.id !== st.qid); save(); closeSheet(); break;
+    case "qfilter": qFilter = b.dataset.m; render(); break;
+    case "review": { const q = dueList(); if (!q.length) break; sheetState = {queue:q.map(x => x.id), i:0, phase:"ask", res:{su:0, mo:0, pas:0, piege:0}}; sheetReview(); break; }
+    case "rv-have": st.phase = "check"; sheetReview(); break;
+    case "rv-dunno": { const q = S.questions.find(x => x.id === st.queue[st.i]); review(q, "pas", false, today()); st.res.pas++; save(); st.phase = "missed"; sheetReview(); break; }
+    case "rv-res": {
+      const q = S.questions.find(x => x.id === st.queue[st.i]), r = b.dataset.r;
+      review(q, r, true, today()); st.res[r]++; if (r === "pas") st.res.piege++; save();
+      st.i++; st.phase = "ask"; sheetReview(); break;
+    }
+    case "rv-next": st.i++; st.phase = "ask"; sheetReview(); break;
+    case "wk": weekOffset = Math.max(0, weekOffset + Number(b.dataset.d)); render(); break;
+    case "bilan": sheetState = {obj: S.objectif ? S.objectif.k : null}; sheetBilan(); break;
+    case "setobj": { const m = $("b-1").value, c = $("b-2").value; st.obj = b.dataset.v; sheetBilan(); $("b-1").value = m; $("b-2").value = c; break; }
+    case "savebilan": {
+      if (!st.obj){ $("b-err").hidden = false; break; }
+      const d = today();
+      S.bilans.push({d, marche:$("b-1").value.trim(), change:$("b-2").value.trim(), obj:st.obj});
+      S.objectif = {k:st.obj, d}; save(); closeSheet(); break;
+    }
+    case "savename": S.name = $("s-name").value.trim(); save(); closeSheet(); break;
+    case "copy": {
+      const txt = $("s-code").textContent;
+      const ok = () => { $("s-copied").hidden = false; };
+      const fallback = () => { const r = document.createRange(); r.selectNodeContents($("s-code")); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); $("s-copied").textContent = "Le code est sélectionné : copie-le avec ton téléphone."; ok(); };
+      try { navigator.clipboard.writeText(txt).then(ok, fallback); } catch(err){ fallback(); }
+      break;
+    }
+    case "import": {
+      try {
+        const o = JSON.parse(decodeURIComponent(escape(atob($("s-import").value.trim()))));
+        if (!Array.isArray(o.sessions) || !Array.isArray(o.questions)) throw 0;
+        o.demo = false; o.bilans = o.bilans || []; S = o; save(); closeSheet();
+      } catch(err){ $("s-err").hidden = false; }
+      break;
+    }
+    case "askreset": $("resetzone").innerHTML = `<div class="confirm"><p>Tout effacer&nbsp;? Séances, questions et bilans seront perdus.</p><div class="row"><button class="btn danger small" data-act="reset">Tout effacer</button><button class="btn quiet small" data-act="close">Annuler</button></div></div>`; break;
+    case "reset": S = blank(S.name); save(); closeSheet(); break;
+  }
+});
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("sheet").hidden) closeSheet(); });
+render();
+</script>
+
+</body>
+</html>
